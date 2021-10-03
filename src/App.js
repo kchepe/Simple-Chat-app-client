@@ -1,23 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import io from "socket.io-client";
+import Chat from "./Chat";
+
+const socket = io.connect("http://localhost:3001");
 
 function App() {
+  const [name, setName] = React.useState("");
+  const [room, setRoom] = React.useState("");
+  const [showRoom, setShowRoom] = React.useState(false);
+
+  const handleName = (e) => {
+    setName(e.target.value);
+  };
+
+  const handleRoom = (e) => {
+    setRoom(e.target.value);
+  };
+
+  const handleSubmit = () => {
+    console.log({ name, room });
+    if (name !== "" && room !== "") {
+      socket.emit("join_room", room);
+      setShowRoom((prevState) => !prevState);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {!showRoom ? (
+        <div className="login">
+          <h2>CHAT SINGLE GIRLS IN YOUR AREA</h2>
+          <div className="component">
+            <input
+              type="text"
+              placeholder="Name here.."
+              value={name}
+              onChange={handleName}
+              className="txt"
+            />
+          </div>
+          <div className="component">
+            <input
+              type="text"
+              placeholder="Room ID.."
+              value={room}
+              onChange={handleRoom}
+              className="txt"
+            />
+          </div>
+          <div>
+            <button onClick={handleSubmit} className="btn">
+              Join Room
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="chatContainer">
+          <Chat socket={socket} name={name} room={room} />
+        </div>
+      )}
     </div>
   );
 }
